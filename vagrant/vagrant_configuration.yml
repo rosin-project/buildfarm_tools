@@ -1,0 +1,25 @@
+# Customize your configuration below pointing to the repositories/branches that hold the custom configuration.
+# After changing the configuration, remember to run the vagrant_configurer.py script
+
+# If authentication is required to clone any of the repositories below, just format it in the URL field this way:
+# http(s)://username:password@path/to/git_url
+# Deploy tokens are preferred over using username/password
+
+buildfarm_deployment_config:
+  branch: master
+  git_url: 'https://github.com/ros-infrastructure/buildfarm_deployment_config.git'
+
+ros_buildfarm_config:
+  branch: master
+  git_url: 'https://github.com/ros-infrastructure/ros_buildfarm_config.git'
+
+rosdistro:
+  branch: master
+  git_url: 'https://github.com/ros/rosdistro.git'
+
+ros_buildfarm:
+  branch: master
+  git_url: 'git+https://github.com/ros-infrastructure/ros_buildfarm.git'
+
+skip_deploy: False
+skip_job_generation: False

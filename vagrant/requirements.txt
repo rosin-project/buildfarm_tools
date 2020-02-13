@@ -1,0 +1,8 @@
+gitdb2==2.0.6
+GitPython==3.0.5
+Jinja2==2.10.3
+MarkupSafe==1.1.1
+pathlib==1.0.1
+ruamel.yaml==0.16.6
+ruamel.yaml.clib==0.2.0
+smmap2==2.0.5

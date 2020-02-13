@@ -1,0 +1,113 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# Copyright 2019 Tecnalia Research & Innovation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/xenial64"
+
+  config.disksize.size = '50GB'
+
+  config.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048 # memory in megabytes
+      vb.cpus = 2
+
+      vb.customize ["modifyvm", :id, "--ioapic", "on"]
+
+      # change the network card hardware for better performance
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio" ]
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio" ]
+
+      # suggested fix for slow network performance
+      # see https://github.com/mitchellh/vagrant/issues/1807
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+  end
+
+  config.vm.provision :shell, inline: "fallocate -l 4G /swapfile && chmod 0600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+
+  config.vm.provision :shell, inline: "echo vm.swappiness = 10 >> /etc/sysctl.conf && echo vm.vfs_cache_pressure = 50 >> /etc/sysctl.conf && sysctl -p"
+
+  config.vm.provision "shell", inline: <<-SHELL
+  locale-gen en_US.UTF-8
+  apt-get update
+  git clone --single-branch -b {{ buildfarm_deployment_config.branch }} {{ buildfarm_deployment_config.git_url }} /root/buildfarm_deployment_config
+  export DEBIAN_FRONTEND=noninteractive
+  bash /root/buildfarm_deployment_config/install_prerequisites.bash
+  apt-get install -y python3 python3-pip
+  pip3 install -U pip setuptools wheel ruamel.yaml
+  echo "*** Finished installing prerequisites ***"
+  SHELL
+
+  config.vm.provision "shell", :path => "fix_ips.py"
+
+  config.vm.define "rosin-test-alpha", primary: true do |alpha|
+      alpha.vm.hostname = "rosin-test-alpha"
+      alpha.vm.network "private_network", ip: "192.168.50.10", :adapter => 2
+
+      alpha.vm.provider "virtualbox" do |alphavb|
+        alphavb.name = "rosin-test-alpha"
+      end
+
+      {% if not skip_deploy %}
+      alpha.vm.provision "shell", inline: <<-SHELL
+      sh -c 'cd /root/buildfarm_deployment_config/ && ./reconfigure.bash master'
+      echo "*** Finished configuring master role ***"
+      SHELL
+      {% endif %}
+
+    alpha.vm.provision "shell", inline: <<-SHELL
+    echo "*** Configuring jobs ... ***"
+    bash /vagrant/config_jobs.sh
+    echo "*** Finished configuring jobs ***"
+    SHELL
+
+  end # end master configuration
+
+  config.vm.define "rosin-test-beta" do |beta|
+      beta.vm.hostname = "rosin-test-beta"
+      beta.vm.network "private_network", ip: "192.168.50.20", :adapter => 2
+
+      beta.vm.provider "virtualbox" do |betavb|
+        betavb.name = "rosin-test-beta"
+      end
+
+    beta.disksize.size = '80GB'
+
+    {% if not skip_deploy %}
+    beta.vm.provision "shell", inline: <<-SHELL
+    sh -c 'cd /root/buildfarm_deployment_config/ && ./reconfigure.bash agent'
+    SHELL
+    {% endif %}
+
+  end # end agent configuration
+
+  config.vm.define "rosin-test-gamma" do |gamma|
+      gamma.vm.hostname = "rosin-test-gamma"
+      gamma.vm.network "private_network", ip: "192.168.50.11", :adapter => 2
+
+      gamma.vm.provider "virtualbox" do |gammavb|
+        gammavb.name = "rosin-test-gamma"
+      end
+
+      {% if not skip_deploy %}
+      gamma.vm.provision "shell", inline: <<-SHELL
+      sh -c 'cd /root/buildfarm_deployment_config/ && ./reconfigure.bash repo'
+      SHELL
+      {% endif %}
+
+  end # end repo configuration
+end
