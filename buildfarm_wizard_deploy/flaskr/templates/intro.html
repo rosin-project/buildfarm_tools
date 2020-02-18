@@ -1,0 +1,76 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="jumbotron">
+      <div class="container">
+
+<h1>Buildarm configuration wizard</h1>
+<p>This is a simple web-based wizard to help setting the configuration for a ROS Buildfarm.</p>
+<p><a class="btn btn-primary btn-lg" href="http://wiki.ros.org/buildfarm" role="button">Learn more about the Buildfarm &raquo;</a></p>
+</div>
+</div>
+
+<h2>Introduction</h2>
+
+<p>The <strong>ROS buildfarm</strong> consists on a series of a git repository projects. They are located at the <a href="https://github.com/ros-infrastructure/">ros-infraestructure group in github</a>, and the list of repositories involved are as follows:</p>
+
+<ul>
+<li><a href="https://github.com/ros-infrastructure/buildfarm_deployment_config">buildfarm<em>deployment</em>config</a>.</li>
+
+<li><a href="https://github.com/ros-infrastructure/buildfarm_deployment">buildfarm_deployment</a>.</li>
+
+<li><a href="https://github.com/ros-infrastructure/ros_buildfarm_config">ros<em>buildfarm</em>config</a>.</li>
+
+<li><a href="https://github.com/ros-infrastructure/ros_buildfarm">ros_buildfarm</a>.</li>
+</ul>
+
+<p>While <code>buildfarm_deployment_config</code> and <code>buildfarm_deployment</code> are related to the <strong>ROS buildfarm</strong> installation, <code>ros_buildfarm_config</code> and <code>ros_buildfarm</code> are focused on job generation.</p>
+
+<p>There are three roles which conform the three machines that compose the <strong>ROS buildfarm</strong>:</p>
+
+<ul>
+<li><code>master</code> which centralizes the job generation.</li>
+
+<li><code>agent</code> which builds the job assigned from master.</li>
+
+<li><code>repo</code> that will hold the packages generated from those jobs in a <code>apt</code> repository.</li>
+</ul>
+
+<p>The configuration files given these three roles that we will need to modify are as follows:</p>
+
+<ul>
+<li><code>hiera/hieradata/common.yaml</code> which holds the common configuration for each role.</li>
+
+<li><code>hiera/hieradata/buildfarm_role/master.yaml</code> with specific information for the master role.</li>
+
+<li><code>hiera/hieradata/buildfarm_role/agent.yaml</code> with specific information for the agent role.</li>
+
+<li><code>hiera/hieradata/buildfarm_role/repo.yaml</code> with specific information for the repo role.</li>
+</ul>
+
+<p>This wizard contains a helper script that assists the user in the generation/modification of the 3 yaml files.</p>
+
+<div>
+  <p><a class="btn btn-primary btn-lg" href="{{ url_for('step_ssh') }}" role="button">Start the wizard &raquo;</a></p>
+  <!-- <a href="{{ url_for('step_ssh') }}">Start the wizard</a> -->
+</div>
+
+{% endblock %}

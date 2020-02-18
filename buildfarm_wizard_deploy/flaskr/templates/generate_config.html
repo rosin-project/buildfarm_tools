@@ -1,0 +1,67 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+{% extends "base.html" %}
+
+{% block app_content %}
+
+<h1>Generation of the deploy configuration</h1>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">Progress</div>
+    <div class="panel-body">
+        <ul>
+            {% for msg in output_msgs %}
+            <li> {{ msg }} </li>
+            {% endfor %}
+        </ul>
+    </div>
+  </div>
+
+  <div class="panel panel-warning">
+    <div class="panel-heading">Warning</div>
+    <div class="panel-body">Keep the file <b>{{ cfg_filename }}</b> safe as it contains sensitive data</div>
+  </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">What to do next</div>
+    <div class="panel-body">
+        <ul>
+            <li>Further customize configuration of the Buildfarm</li>
+            <ul>
+                <li>If you have special needs, you might further tweak the configuration stored in the repository <pre>{{ git_dst_repo }}</pre> (branch: {{ git_dst_branch }} )</li>
+                <li>Check the <a href="https://github.com/ros-infrastructure/buildfarm_deployment#updating-values">official buildfarm deployment configuration</a> for further information.</li>
+            </ul>
+            <li>Provision machines</li>
+            <ul>
+                <li>The buildfarm is currently based on at least three different machines.</li>
+                <li>Chech the <a href="https://github.com/ros-infrastructure/buildfarm_deployment#provisioning">official documentation</a> for information on the requirements for the machines.</li>
+            </ul>
+            <li>Deploy the buildfarm</li>
+            <ul>
+                <li>Once you are happy with your configuration, you can <a href="https://github.com/ros-infrastructure/buildfarm_deployment#deployment">proceed to deploy the machines.</a></li>
+            </ul>
+            <li>Configure the jobs in the Buildfarm - use the Wizard</li>
+            <ul>
+                <li>Once you have a buildfarm up and running you need to configure the jobs to be executed.</li>
+                <li>You can <a href="https://github.com/ros-infrastructure/ros_buildfarm_config">check the documentation</a> and/or you can use the <i>configuration wizard</i> to guide you through the process.</li>
+                <li>Note that you will need the configuration file generated above to run the wizard.</li>
+            </ul>
+        </ul>
+    </div>
+  </div>
+
+{% endblock %}

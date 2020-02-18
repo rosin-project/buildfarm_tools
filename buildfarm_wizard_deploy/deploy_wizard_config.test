@@ -1,0 +1,4 @@
+CUSTOM_REPO_URL = 'http://localhost:3000/testuser/buildfarm_deployment_config.git'
+CUSTOM_BRANCH = 'wizard'
+GIT_USERNAME = 'testuser'
+GIT_PASSWD = 'testpasswd'

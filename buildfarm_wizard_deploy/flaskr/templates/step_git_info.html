@@ -1,0 +1,37 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h1>Git repository information to store the Buildfarm custom configuration</h1>
+
+<p>As a result of running this wizard, the information generated will be <emph>pushed</emph> into a git repository.</p>
+
+<p>Afterwards, following the instructions you will be able to use that repository to deploy the Buildfarm.</p>
+
+<div class="panel panel-warning">
+    <div class="panel-heading">Sensitive information</div>
+    <div class="panel-body">Make sure the repository is private, as it will contain some sensitive information (e.g. keys and passwords)</div>
+</div>
+
+<div class="input-group">
+        {{ wtf.quick_form(form) }}
+</div>
+<br>
+
+{% endblock %}
