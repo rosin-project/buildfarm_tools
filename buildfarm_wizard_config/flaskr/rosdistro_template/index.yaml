@@ -1,0 +1,41 @@
+%YAML 1.1
+# ROS buildfarm index file
+---
+distributions:
+{% for item in ros_distros %}
+  {{ item }}:
+    doc_builds:
+      default: {{ item }}/doc-build.yaml
+      released-packages-without-doc-job: {{ item }}/doc-released-build.yaml
+    notification_emails:
+    - {{ email_buildfarm }}
+    release_builds:
+      default: {{ item }}/release-build.yaml
+    source_builds:
+      default: {{ item }}/source-build.yaml
+{% endfor %}
+doc_builds:
+  independent-packages: doc-independent-build.yaml
+jenkins_url: http://{{ip_master}}:8080
+notification_emails:
+- {{ email_buildfarm }}
+prerequisites:
+  debian_repositories:
+  - http://{{ip_repo}}/ubuntu/building
+{% if distro_model == 'addon_rosdep' %}
+  - http://packages.ros.org/ros/ubuntu
+{% endif %}
+  debian_repository_keys:
+  - |
+{{ gpg_public_key | indent( width=4, indentfirst=True) }}
+rosdistro_index_url: {{ rosdistro_index_url }}
+{% if git_fetch_ssh_id %}
+git_ssh_credential_id: {{ git_fetch_ssh_id }}
+{% endif %}
+status_page_repositories:
+  default:
+  - http://{{ip_repo}}/ubuntu/building
+  - http://{{ip_repo}}/ubuntu/testing
+  - http://{{ip_repo}}/ubuntu/main
+type: buildfarm
+version: 1

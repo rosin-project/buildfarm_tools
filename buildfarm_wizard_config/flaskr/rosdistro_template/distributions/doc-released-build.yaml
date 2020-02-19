@@ -1,0 +1,26 @@
+%YAML 1.1
+# ROS buildfarm doc-build file
+---
+documentation_type: released_manifest
+jenkins_job_priority: 91
+jenkins_job_timeout: 30
+notifications:
+  emails:
+  - {{ email_buildfarm }}
+{% if distro_model in ['addon_frozen', 'addon_rosdep'] %}
+tag_whitelist:
+  - {{ addon_tag }}
+{% endif %}
+targets:
+  ubuntu:
+{% for item in ubuntu_with_ros %}
+    {{ item }}:
+{% for archi in architectures %}
+{% if archi != 'source' %}
+      {{ archi }}:
+{% endif %}
+{% endfor %}
+{% endfor %}
+type: doc-build
+upload_credential_id: 1e7d4696-7fd4-4bc6-8c87-ebc7b6ce16e5
+version: 2

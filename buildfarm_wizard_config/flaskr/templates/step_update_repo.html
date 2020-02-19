@@ -1,0 +1,43 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<h1>ros buildfarm config Files generation</h1>
+
+{% if success is sameas true %}
+
+<p> Updated config has been pushed to <code>{{ config_repo }}</code></p>
+
+<p>Now we will connect to the buildfarm master to complete the setup</p>
+
+<div>
+    <p><a class="btn btn-primary btn-lg" href="{{ url_for('step_configure_master') }}" role="button"> Next</a></p>
+</div>
+
+{% else %}
+<h1>An error occured!</h1>
+<p>Could not push the generated files
+    to the config repository <code>{{ config_repo }}</code>.</p>
+<p> Check on terminal to find out what is wrong.
+    Please relaunch the wizard.</p>
+{% endif %}
+
+{% endblock %}

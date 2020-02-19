@@ -1,0 +1,145 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<h3> Settings for rosdistro addon strategies</h3>
+
+<p>
+  You have selected one of the two add-on strategies.
+  Some specific files are to be added to the rosdistro repository.
+  This step is common for both strategies.
+  The difference between the two add-on strategies only comes at the build initialization step.
+</p>
+
+<p> First of all you should create a fork of the official rosdistro, for adding your addon.</p>
+
+<p>
+  The Addon strategies require adding to the custom <code>rosdistro</code> repo
+  a file describing the custom packages added to the standard distribution.
+  The first step consists in referencing that file within the global file
+  <a href="https://github.com/ros/rosdistro/blob/master/index.yaml">index.html</a>.
+  If we look at that file, we can see in it per ROS distribution the following text:
+</p>
+
+
+<pre>
+<code class="yaml">
+%YAML 1.1
+# ROS index file
+# see REP 143: http://ros.org/reps/rep-0143.html
+---
+distributions:
+  [all ros distros]:
+    ...
+  kinetic:
+    distribution: [kinetic/distribution.yaml]
+    distribution_cache: http://repositories.ros.org/rosdistro_cache/kinetic-cache.yaml.gz
+type: index
+version: 3
+</code>
+</pre>
+
+<p>
+  In addition to the official ROS packages, we will create an additional file
+  containing the list of our packages.
+  For instance, if we focus on <code>kinetic</code>, we will create
+  in the <code>kinetic</code> folder a new file, <code>addon_distribution.yaml</code>.
+  We start referencing it in the <code>index.yaml</code> file, by extending the previous information to be:
+</p>
+
+<pre>
+  <code class="yaml">
+  %YAML 1.1
+  # ROS index file
+  # see REP 143: http://ros.org/reps/rep-0143.html
+  ---
+  distributions:
+    kinetic:
+      distribution: [kinetic/distribution.yaml, kinetic/addon_distribution.yaml]
+      distribution_cache: http://[repo_machine_ip]/rosdistro_cache/kinetic-cache.yaml.gz
+  type: index
+  version: 3
+  </code>
+</pre>
+<p>
+  Note that we also changed the <code>distribution_cache</code> tag, to be the url
+  of the repo machine, as described in the deploy wizard.
+</p>
+<p>
+  Next step consists in filling the added file, <code>kinetic/addon_distribution.yaml</code> with the appropriate content.
+  Similarly to the format used in the ditribution files of any ROS distribution, we describe there our additional packages
+  (see the official <code>distribution.yaml</code> of <a href="https://github.com/ros/rosdistro/blob/master/kinetic/distribution.yaml">kinetic</a> as an example).
+  In the following example, we just add one package, named <code>basic_package</code>:
+</p>
+
+<pre>
+<code class="yaml">
+%YAML 1.1
+# ROS distribution file
+# see REP 143: http://ros.org/reps/rep-0143.html
+---
+release_platforms:
+  ubuntu:
+  - xenial
+repositories:
+  basic_package:
+    doc:
+      type: git
+      url: https://github.com/wherever/basic_package.git
+      version: kinetic-devel
+    release:
+      tags:
+        release: release/kinetic/{package}/{version}
+      url: https://github.com/wherever/basic_package-release.git
+      version: 0.0.2-0
+    source:
+      test_pull_requests: false
+      type: git
+      url: https://github.com/wherever/basic_package.git
+      version: kinetic-devel
+    status: maintained
+tags:
+- custom
+type: distribution
+version: 2
+</code>
+</pre>
+
+<p>In the previous file, it is important to set the tag information:</p>
+<pre>
+<code class="yaml">
+tags:
+- custom
+type: distribution
+version: 2
+</code>
+</pre>
+
+<p>
+  This tag value (here set to <code>custom</code>) will be used later on within the configuration of the jobs.
+</p>
+
+<div>
+  <p><a class="btn btn-primary btn-lg" href="{{ url_for('index') }}" role="button">Understood</a></p>
+
+</div>
+
+{% endblock %}

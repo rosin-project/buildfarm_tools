@@ -1,0 +1,39 @@
+%YAML 1.1
+# ROS buildfarm source-build file
+---
+jenkins_commit_job_priority: 71
+jenkins_job_timeout: 120
+jenkins_pull_request_job_priority: 61
+notifications:
+  committers: false
+  emails:
+  - {{ email_buildfarm }}
+  maintainers: false
+repositories:
+  keys:
+  - |
+{{ gpg_public_key | indent( width=4, indentfirst=True) }}
+  urls:
+  - http://{{ ip_repo }}/ubuntu/testing
+{% if distro_model in ['addon_frozen', 'addon_rosdep'] %}
+tag_whitelist:
+  - {{ addon_tag }}
+{% endif %}
+targets:
+  ubuntu:
+{% for item in ubuntu_with_ros %}
+    {{ item }}:
+{% for archi in architectures %}
+{% if archi != 'source' %}
+      {{ archi }}:
+{% endif %}
+{% endfor %}
+{% endfor %}
+test_commits:
+  default: true
+# do not run pr builds on the test farm (otherwise we'll get multiple reports)
+test_pull_requests:
+  default: false
+  force: false
+type: source-build
+version: 2

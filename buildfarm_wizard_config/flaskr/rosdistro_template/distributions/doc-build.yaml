@@ -1,0 +1,38 @@
+%YAML 1.1
+# ROS buildfarm doc-build file
+---
+canonical_base_url: http://{{ ip_repo }}/docs
+documentation_type: rosdoc_lite
+jenkins_job_priority: 91
+jenkins_job_timeout: 120
+notifications:
+  committers: false
+  emails:
+  - {{ email_buildfarm }}
+  maintainers: false
+repositories:
+  keys:
+  - |
+{{ gpg_public_key | indent( width=4, indentfirst=True) }}
+  urls:
+  - http://{{ ip_repo }}/ubuntu/testing
+{% if distro_model in ['addon_frozen', 'addon_rosdep'] %}
+tag_whitelist:
+  - {{ addon_tag }}
+{% endif %}
+targets:
+  ubuntu:
+{% for item in ubuntu_with_ros %}
+    {{ item }}:
+{% for archi in architectures %}
+{% if archi != 'source' %}
+      {{ archi }}:
+{% endif %}
+{% endfor %}
+{% endfor %}
+type: doc-build
+upload_credential_id: 1e7d4696-7fd4-4bc6-8c87-ebc7b6ce16e5
+upload_host: repo
+upload_root: /var/repos/docs
+upload_user: jenkins-slave
+version: 2

@@ -1,0 +1,52 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+{% if success is sameas true %}
+
+<h1>General information</h1>
+
+<p> Introduced information has been locally stored in <code>{{ filename }}</code></p>
+
+<h1>Config material generation</h1>
+
+<p>The operations to be performed are:</p>
+<ul>
+    <li>Generate locally the buildfarm config material</li>
+    <li>Clone locally the config repository</li>
+    <li>Deploy in the repository the generated material</li>
+    <li>Commit the changes</li>
+    <li>Push the commit to the config repository</li>
+</ul>
+
+You can now proceed!
+
+<div>
+    <p><a class="btn btn-primary btn-lg" href="{{ url_for('step_gen_files') }}" role="button"> Next</a></p>
+</div>
+
+{% else %}
+<h1>An error occured!</h1>
+<p>Could not store the collected config in {{ filename }}</p>
+<p> Check on terminal to find out what is wrong. Please relaunch the wizard.</p>
+{% endif %}
+
+{% endblock %}

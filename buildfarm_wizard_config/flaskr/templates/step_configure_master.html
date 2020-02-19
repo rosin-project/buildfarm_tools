@@ -1,0 +1,125 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h2> Setting up the environment</h2>
+
+
+<p> We start making sure required dependencies are installed on the `master` machine.</p>
+
+<pre> <code class="bash language-bash">
+ssh {{ config.ip_master }}
+sudo apt update && sudo apt install python3 python3-all python3-pip
+
+mkdir /tmp/deploy_ros_buildfarm
+cd /tmp/deploy_ros_buildfarm
+
+# the option '--without-pip' is used to work around a Python bug:
+# https://bugs.launchpad.net/ubuntu/+source/python3.4/+bug/1290847
+pyvenv-3.4 --without-pip venv
+
+. venv/bin/activate
+
+# necessary because of '--without-pip'
+curl https://bootstrap.pypa.io/get-pip.py | python3
+
+pip3 install empy
+pip3 install jenkinsapi
+pip3 install rosdistro
+pip3 install ros_buildfarm
+</code></pre>
+
+<p>TODO:</p>
+<ul>
+    <li>It might be better to run this as `root`</li>
+    <li>todo check version of pip (from github?)</li>
+</ul>
+
+<h3>Provide credentials for Jenkins master</h3>
+
+<p>To allow ros_buildfarm to configure any jobs on the Jenkins master it requires credentials.</p>
+
+<p>On the <code>master</code> machine, as <code>root</code> user, create the <code>.ini</code> file <code>~/.buildfarm/jenkins.ini</code> containing your credentials to log in to the Jenkins master, e.g.:</p>
+
+<pre>
+<code>
+[http://jenkins-instance-url.example.com:8080]
+username= {{ config.jenkins_user }}
+password= {{ config.jenkins_password }}
+</code>
+</pre>
+
+<p> TODO: We could generate the file and provide it, asking for jenkins credential and instance url</p>
+
+
+<h3>Generate the administrative Jenkins jobs</h3>
+
+Get into the <code>master</code> machine:
+<pre>
+  <code class="bash language-bash">
+  ssh {{ config.ip_master }}
+  </code>
+</pre>
+
+
+To show the desired Jenkins configuration, run:
+
+{% if success is sameas true %}
+<pre>
+<code class="bash language-bash">
+generate_all_jobs.py {{ url_raw }}
+</code>
+</pre>
+{% else %}
+<pre>
+  <code class="bash language-bash">
+  # for github like servers
+  generate_all_jobs.py https://raw.githubusercontent.com/YOUR_FORK/ros_buildfarm_config/master/index.yaml
+  # for gitlab like servers
+  generate_all_jobs.py https://gitlab.com/YOUR_FORK/ros_buildfarm_config/raw/master/index.yaml
+</code>
+</pre>
+{% endif %}
+
+<p>To perform the configuration: </p>
+
+{% if success is sameas true %}
+<pre>
+  <code class="bash language-bash">
+  generate_all_jobs.py {{ config.config_repo }}/blob/master/index.yaml --commit
+  </code>
+</pre>
+{% else %}
+<pre>
+  <code class="bash language-bash">
+  # for github like servers
+  generate_all_jobs.py https://raw.githubusercontent.com/YOUR_FORK/ros_buildfarm_config/master/index.yaml --commit
+  # for gitlab like servers
+  generate_all_jobs.py https://gitlab.com/YOUR_FORK/ros_buildfarm_config/raw/master/index.yaml --commit
+  </code>
+</pre>
+{% endif %}
+
+<p> TODO If the repo is on a private repo, might be good reminding the ssh keys stuff needed.</p>
+
+<div>
+  <p><a class="btn btn-primary btn-lg" href="{{ url_for('step_buildfarm_trigger') }}" role="button"> Proceed to the buildfarm triggering</a></p>
+</div>
+{% endblock %}

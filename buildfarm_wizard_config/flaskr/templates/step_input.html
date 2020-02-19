@@ -1,0 +1,69 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<h1>Information collection</h1>
+
+<form action="" method="POST" enctype="multipart/form-data" >
+    {{ form.hidden_tag() }}
+
+    <h2>Configuration file</h2>
+    <p>Indicate the location of the file stored during the deploy wizard</p>
+    {{ wtf.form_field(form.file_config) }}
+
+    <h2>Administrator Email </h2>
+    <p>Indicate the email potentially used in the buildfarm management </p>
+    {{ wtf.form_field(form.email) }}
+
+    <h2>ROS distribution model</h2>
+    <p>Select the ROS distribution model you are interested in</p>
+    {{ wtf.form_field(form.distro_mode) }}
+
+    <h2>ROS distribution url</h2>
+    <p>
+    Insert the url of the ROS distribution you would like to use.
+    Unless you use a custom distribution, the appropriate value should be
+    <code>https://raw.githubusercontent.com/ros/rosdistro/master/index.yaml</code>
+    </p>
+    {{ wtf.form_field(form.distro_repo) }}
+
+    <h2>Buildfarm Configuration url</h2>
+    <p>
+    We will generate a commit on your personal fork of the repository buildfarm_config.
+    Paste the appropriate url to clone locally that repository
+    </p>
+    {{ wtf.form_field(form.config_repo) }}
+    <p>
+        If using http or https protocol, please provide your credentials
+        (if using ssh, and assuming the keys are globally set, credentials are not required).
+    </p>
+    {{ wtf.form_field(form.git_username) }}
+    {{ wtf.form_field(form.git_password) }}
+
+    <p>
+        Indicate the branch to which the commit should be pushed
+    </p>
+    {{ wtf.form_field(form.config_branch) }}
+    <p>{{ form.submit() }}</p>
+
+</form>
+
+{% endblock %}

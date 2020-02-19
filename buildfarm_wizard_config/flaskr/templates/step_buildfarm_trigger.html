@@ -1,0 +1,129 @@
+<!--
+Copyright 2019 Tecnalia Research and Innovation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ -->
+
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h2>Trigger jobs to perform the initialization</h2>
+
+
+<p>WARNING: Copy-pasting info from <a href="https://github.com/ros-infrastructure/ros_buildfarm/blob/master/doc/deploy_configuration.rst#trigger-jobs-to-perform-initialization">the official doc</a>:</p>
+
+<p>Log in as the admin user to the Jenkins master using your password defined in the configuration. All administrative jobs can be found in the Manage view.</p>
+
+<p>
+Since the "All" view will contain a lot of jobs it is better to select a different default view to prevent the huge page to be loaded by default.
+Go to the Jenkins URL, "Manage Jenkins", "Configure System" and select a different "Default view", e.g. "Manage".</p>
+
+
+<h3> Import packages</h3>
+
+<p>Trigger the job <code>import_upstream</code> to get all the required bootstrap packages into the repository, with the <code>EXECUTE_IMPORT</code> option enabled.</p>
+
+<p>The first import needs to be done using the predefined file <code>ros_bootstrap.yaml</code>.
+This file is present on the repo machine in <code>/home/jenkins-agent/reprepro_config/</code>.
+This installs all basic dependencies required by the buildfarm, such as <code>catkin</code></p>
+
+{% if config.distro_model == 'addon_frozen' %}
+<h3>Import and Freeze ROS packages</h3>
+
+<p>This step is only required if you use the <i>addon strategy with frozen ROS packages</i></p>
+
+According to <a href="https://github.com/ros-infrastructure/ros_buildfarm/blob/master/doc/custom_rosdistro.rst#import-ros-packages-which-are-not-built-by-the-custom-build-farm">the official documentation</a>:
+
+<p>Whenever you merge changes from the the upstream rosdistro repository into your custom fork you must also import the current snapshot of available packages from the official repositories</p>
+
+<p>To do this, we connect on the <code>repo</code> machine, with the <code>jenkins-agent</code> user:
+
+<pre>
+<code class="bash language-bash">
+ssh {{ config.ip_repo }}
+su jenkins-agent
+</code>
+</pre>
+
+We are going to create a file per ROS distribution.
+In the case of the current configuration, we will create {{ config.ros_distros | length }} files:
+
+{% for distro in config.ros_distros %}
+<h4> File import_{{ distro }}.yaml </h4>
+
+<pre>
+<code class="yaml">
+name: backfill-ros
+method: http://packages.ros.org/ros/ubuntu/
+suites: [{{ config.distros | selectattr('ros', 'equalto', distro) | map(attribute='ubuntu') | join(", ") }}]
+component: main
+architectures: [{{ config.architectures | join(", ") }}]
+filter_formula: Package (% ros-{{ distro }}-* )
+</code>
+</pre>
+
+{% endfor %}
+
+<p>An appropriate place to put these file is:</p>
+
+<pre>
+<code class="bash language-bash">
+ssh {{ config.ip_repo }}
+su jenkins-agent
+cd /home/jenkins-agent/reprepro_config/
+</code>
+</pre>
+
+<p> Make sure repo machine's jenkins-agent user have permissions to access copied file.
+    If the file is copied by root user, change file ownership</p>
+
+<pre>
+<code class="bash language-bash">
+{% for distro in config.ros_distros %}
+chown jenkins-agent import_{{ distro }}.yaml
+chgrp jenkins-agent import_{{ distro }}.yaml
+{% endfor %}
+</code>
+</pre>
+
+<p>Like in the previous step, we then trigger the job <code>import_upstream</code> with the <code>EXECUTE_IMPORT</code> option enabled, and we point to the file previously created.</p>
+
+<p> This <a href="https://groups.google.com/forum/#!topic/ros-sig-buildfarm/rvstriwTnUI">page</a> indicates other suitable locations.</p>
+
+<p> TODO: how to get for example packages from `indigo` and `kinetic`.</p>
+
+{% endif %}
+
+<h3>Launch the `*-reconfigure-jobs` jobs</h3>
+
+<p>This creates all required jobs for each defined packages (`doc`, `devel` and `release`):</p>
+<ul>
+    <li><code>K_doc_reconfigure_jobs</code>: generates documentation</li>
+    <li><code>K_dev_reconfigure_jobs</code>: builds packages</li>
+    <li><code>K_rel_reconfigure_jobs</code>: generates binaries</li>
+</ul>
+
+<p>NOTE: the `K` refers to the kinetic distribution (`I` would be used for indigo)</p>
+
+<h2>Conclusions and daily practice</h2>
+
+<h3>Open points</h3>
+<ul>
+    <li>how to daily use the buildfarm</li>
+    <li>how to change the rosdistro (adding packages for instance)</li>
+    <li>handle various rosdistro</li>
+</ul>
+
+{% endblock %}

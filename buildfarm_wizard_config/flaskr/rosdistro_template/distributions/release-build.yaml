@@ -1,0 +1,38 @@
+%YAML 1.1
+# ROS buildfarm release-build file
+---
+abi_incompatibility_assumed: true
+jenkins_binary_job_priority: 84
+jenkins_binary_job_timeout: 120
+jenkins_source_job_priority: 81
+jenkins_source_job_timeout: 30
+notifications:
+  emails:
+  - {{ email_buildfarm }}
+  maintainers: false
+sync:
+  package_count: 2000
+repositories:
+  keys:
+  - |
+{{ gpg_public_key | indent( width=4, indentfirst=True) }}
+  urls:
+  - http://{{ ip_repo }}/ubuntu/building
+{% if distro_model in ['addon_frozen', 'addon_rosdep'] %}
+tag_whitelist:
+  - {{ addon_tag }}
+{% endif %}
+target_repository: http://{{ ip_repo }}/ubuntu/building
+targets:
+  ubuntu:
+{% for item in ubuntu_with_ros %}
+    {{ item }}:
+{% for archi in architectures %}
+{% if archi != 'source' %}
+      {{ archi }}:
+{% endif %}
+{% endfor %}
+{% endfor %}
+type: release-build
+upload_credential_id: 1e7d4696-7fd4-4bc6-8c87-ebc7b6ce16e5
+version: 2
