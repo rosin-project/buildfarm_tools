@@ -2,6 +2,8 @@
 
 # Buildfarm Tools
 
+**Note**: this repository is now archived. The tools that it contains targeted version 2.x of the ROS Buildfarm infrastructure, so it will likely will not work with latest versions.
+
 This repository contains three tools:
 
 - A web-based _wizard_ that collects information from the user and supports him/her in generating a valid Buildfarm deploy configuration
